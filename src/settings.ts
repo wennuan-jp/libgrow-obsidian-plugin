@@ -1,18 +1,20 @@
 import {App, PluginSettingTab, Setting} from "obsidian";
-import MyPlugin from "./main";
+import LibGrowPlugin from "./main";
 
-export interface MyPluginSettings {
-	mySetting: string;
+export interface LibGrowSettings {
+	lmStudioUrl: string;
+	modelName: string;
 }
 
-export const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
+export const DEFAULT_SETTINGS: LibGrowSettings = {
+	lmStudioUrl: "http://localhost:1234",
+	modelName: "local-model"
 }
 
-export class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+export class LibGrowSettingTab extends PluginSettingTab {
+	plugin: LibGrowPlugin;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: LibGrowPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -23,13 +25,24 @@ export class SampleSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName('Settings #1')
-			.setDesc('It\'s a secret')
+			.setName('LM Studio URL')
+			.setDesc('Endpoint for your local LM Studio server.')
 			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
+				.setPlaceholder('http://localhost:1234')
+				.setValue(this.plugin.settings.lmStudioUrl)
 				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
+					this.plugin.settings.lmStudioUrl = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Model name')
+			.setDesc('Specify the model identifier to use.')
+			.addText(text => text
+				.setPlaceholder('local-model')
+				.setValue(this.plugin.settings.modelName)
+				.onChange(async (value) => {
+					this.plugin.settings.modelName = value;
 					await this.plugin.saveSettings();
 				}));
 	}

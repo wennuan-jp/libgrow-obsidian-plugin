@@ -1,3 +1,13 @@
+# What is libgrow Obsidian plugin
+- Dedicated to Obsidian
+- Displays a popup toolbar when text is selected in Obsidian
+- Invokes the LM Studio service using a predefined prompt, the selected content, and its context to create a seamless reading and searching experience in Obsidian
+
+# dev spec
+
+All code is written in TypeScript
+
+
 # Obsidian Sample Plugin
 
 This is a sample plugin for Obsidian (https://obsidian.md).
