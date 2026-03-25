@@ -9,20 +9,27 @@ import { Editor } from "obsidian";
  * @returns The surrounding context as a single string
  */
 export function getSurroundingContext(
-	editor: Editor, 
+	editor: Editor | null, 
 	linesBefore: number = 20, 
 	linesAfter: number = 20
 ): string {
-	const cursor = editor.getCursor("from");
-	const lastLine = editor.lineCount() - 1;
+	if (!editor) return "";
+	
+	try {
+		const cursor = editor.getCursor("from");
+		const lastLine = editor.lineCount() - 1;
 
-	const startLine = Math.max(0, cursor.line - linesBefore);
-	const endLine = Math.min(lastLine, cursor.line + linesAfter);
+		const startLine = Math.max(0, cursor.line - linesBefore);
+		const endLine = Math.min(lastLine, cursor.line + linesAfter);
 
-	let context = "";
-	for (let i = startLine; i <= endLine; i++) {
-		context += editor.getLine(i) + "\n";
+		let context = "";
+		for (let i = startLine; i <= endLine; i++) {
+			context += editor.getLine(i) + "\n";
+		}
+
+		return context.trim();
+	} catch (e) {
+		console.error("libgrow context error:", e);
+		return "";
 	}
-
-	return context.trim();
 }

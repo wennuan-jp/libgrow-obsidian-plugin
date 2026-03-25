@@ -24,12 +24,15 @@ export class FloatingToolbar {
 		this.currentEditor = editor;
 		const selection = editor.getSelection();
 		
+		console.log("FloatingToolbar: show called, selection is:", selection);
+
 		if (!selection || selection.trim().length === 0) {
 			this.hide();
 			return;
 		}
 
 		if (!this.toolbarEl) {
+			console.log("FloatingToolbar: creating element");
 			this.createToolbar();
 		}
 
@@ -40,6 +43,62 @@ export class FloatingToolbar {
 			this.toolbarEl.removeClass("libgrow-hidden");
 			this.toolbarEl.removeClass("libgrow-fade-out");
 			this.toolbarEl.addClass("libgrow-fade-in");
+			console.log("FloatingToolbar: added visible classes to", this.toolbarEl);
+		}
+	}
+
+	/**
+	 * Fallback method for Reading mode or non-editor selections.
+	 */
+	showWithFallback(selection: string) {
+		this.currentEditor = null;
+		
+		console.log("FloatingToolbar: showWithFallback called, selection is:", selection);
+
+		if (!this.toolbarEl) {
+			this.createToolbar();
+		}
+
+		this.isVisible = true;
+		this.updatePositionFallback();
+		
+		if (this.toolbarEl) {
+			this.toolbarEl.removeClass("libgrow-hidden");
+			this.toolbarEl.removeClass("libgrow-fade-out");
+			this.toolbarEl.addClass("libgrow-fade-in");
+		}
+	}
+
+	/**
+	 * Positions the toolbar near the window selection coordinates.
+	 */
+	private updatePositionFallback() {
+		if (!this.toolbarEl) return;
+
+		try {
+			const selection = window.getSelection();
+			if (!selection || selection.rangeCount === 0) return;
+
+			const range = selection.getRangeAt(0);
+			const coords = range.getBoundingClientRect();
+			
+			console.log("FloatingToolbar: fallback coordinates found:", coords);
+
+			const toolbarWidth = this.toolbarEl.offsetWidth || 300;
+			const toolbarHeight = this.toolbarEl.offsetHeight || 50;
+
+			let left = (coords.left + coords.right) / 2 - toolbarWidth / 2;
+			let top = coords.top - toolbarHeight - 10;
+
+			left = Math.max(10, Math.min(window.innerWidth - toolbarWidth - 10, left));
+			top = Math.max(10, Math.min(window.innerHeight - toolbarHeight - 10, top));
+
+			this.toolbarEl.setCssProps({
+				"left": `${left}px`,
+				"top": `${top}px`
+			});
+		} catch (e) {
+			console.error("libgrow position error:", e);
 		}
 	}
 
@@ -47,7 +106,8 @@ export class FloatingToolbar {
 	 * Hides the toolbar from view.
 	 */
 	hide() {
-		if (this.toolbarEl) {
+		if (this.toolbarEl && this.isVisible) {
+			console.log("FloatingToolbar: hiding");
 			this.toolbarEl.removeClass("libgrow-fade-in");
 			this.toolbarEl.addClass("libgrow-fade-out");
 			// Use timeout to allow transition to finish
@@ -69,6 +129,7 @@ export class FloatingToolbar {
 		this.toolbarEl.addClass("libgrow-toolbar");
 		this.toolbarEl.addClass("libgrow-hidden");
 		document.body.appendChild(this.toolbarEl);
+		console.log("FloatingToolbar: element appended to body");
 
 		PREDEFINED_PROMPTS.forEach(prompt => {
 			const button = this.toolbarEl!.createEl("button", {
@@ -105,7 +166,25 @@ export class FloatingToolbar {
 
 		try {
 			// getSelectionCoords gets pixel coordinates of the selection
-			const coords = (editor as any).getSelectionCoords();
+			// Use a safer way to get selection coords
+			let coords: any = null;
+			if ((editor as any).getSelectionCoords) {
+				coords = (editor as any).getSelectionCoords();
+			} else if ((editor as any).coordsAtPos) {
+				coords = (editor as any).coordsAtPos(editor.getCursor("from"));
+				if (coords) {
+					// Adapt coordsAtPos to the same format
+					coords = {
+						left: coords.left,
+						right: coords.right || coords.left,
+						top: coords.top,
+						bottom: coords.bottom
+					};
+				}
+			}
+
+			console.log("FloatingToolbar: coordinates found:", coords);
+
 			if (!coords) return;
 
 			const toolbarWidth = this.toolbarEl.offsetWidth || 300;
@@ -118,6 +197,8 @@ export class FloatingToolbar {
 			// Basic viewport bounds checking
 			left = Math.max(10, Math.min(window.innerWidth - toolbarWidth - 10, left));
 			top = Math.max(10, Math.min(window.innerHeight - toolbarHeight - 10, top));
+
+			console.log(`FloatingToolbar: positioning at ${left}, ${top}`);
 
 			this.toolbarEl.setCssProps({
 				"left": `${left}px`,

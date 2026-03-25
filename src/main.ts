@@ -1,4 +1,4 @@
-import { MarkdownView, Plugin } from 'obsidian';
+import { Editor, MarkdownView, Plugin } from 'obsidian';
 import { DEFAULT_SETTINGS, LibGrowSettings, LibGrowSettingTab } from "./settings";
 import { FloatingToolbar } from "./ui/FloatingToolbar";
 
@@ -16,11 +16,17 @@ export default class LibGrowPlugin extends Plugin {
 		this.toolbar = new FloatingToolbar(this.app, this.settings);
 
 		// Selection event listeners: mouseup for primary, keyup for keyboard selection
-		this.registerDomEvent(document, 'mouseup', (evt: MouseEvent) => {
+		// Listening on window/document for global captures
+		this.registerDomEvent(window, 'mouseup', (evt: MouseEvent) => {
 			this.handleSelection();
 		});
 
-		this.registerDomEvent(document, 'keyup', (evt: KeyboardEvent) => {
+		this.registerDomEvent(window, 'keyup', (evt: KeyboardEvent) => {
+			this.handleSelection();
+		});
+
+		// Also listen specifically on workspace container for high-reliability in Obsidian
+		this.registerDomEvent(this.app.workspace.containerEl, 'mouseup', () => {
 			this.handleSelection();
 		});
 
@@ -46,19 +52,42 @@ export default class LibGrowPlugin extends Plugin {
 			return;
 		}
 
+		console.log("libgrow: investigating selection...");
+
 		const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+		let selection = "";
+		let editor: Editor | null = null;
+
 		if (activeView) {
-			const editor = activeView.editor;
-			const selection = editor.getSelection();
-			
-			if (selection && selection.trim().length > 0) {
-				// Show toolbar with a slight delay to ensure coordinates are updated
-				setTimeout(() => {
-					this.toolbar.show(editor);
-				}, 50);
-			} else {
-				this.toolbar.hide();
+			editor = activeView.editor;
+			selection = editor.getSelection();
+		}
+
+		// Fallback to window selection if editor selection is empty (e.g., Reading mode)
+		if (!selection || selection.trim().length === 0) {
+			const windowSelection = window.getSelection();
+			if (windowSelection && windowSelection.toString().trim().length > 0) {
+				selection = windowSelection.toString();
 			}
+		}
+
+		console.log("libgrow selection discovered:", selection ? selection.length : 0);
+
+		if (selection && selection.trim().length > 0) {
+			console.log("libgrow: triggering toolbar display");
+			// Show toolbar with a slight delay to ensure coordinates are updated
+			setTimeout(() => {
+				// If we have an editor, use it for context, otherwise pass a dummy editor for positioning
+				if (editor) {
+					this.toolbar.show(editor);
+				} else {
+					// Positioning in reading mode requires different logic, 
+					// for now, we try to show it near the mouse coordinates or window selection
+					this.toolbar.showWithFallback(selection);
+				}
+			}, 50);
+		} else {
+			this.toolbar.hide();
 		}
 	}
 
