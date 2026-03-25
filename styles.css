@@ -1,8 +1,84 @@
-/*
+/* Floating Toolbar Styling */
+.libgrow-toolbar {
+    position: absolute;
+    display: flex;
+    gap: 4px;
+    padding: 6px;
+    background: rgba(var(--background-secondary-rgb), 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(var(--divider-color-rgb), 0.3);
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: auto;
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.libgrow-toolbar-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 10px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+}
 
-If your plugin does not need CSS, delete this file.
+.libgrow-toolbar-button:hover {
+    background-color: var(--background-modifier-hover);
+    color: var(--text-normal);
+    transform: translateY(-1px);
+}
 
-*/
+.libgrow-toolbar-button svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+}
+
+.libgrow-loading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    color: var(--text-accent);
+}
+
+.libgrow-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--text-accent);
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: libgrow-spin 0.8s linear infinite;
+}
+
+@keyframes libgrow-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Result Modal Styling */
+.libgrow-result-container {
+    padding: 10px;
+}
+
+.libgrow-result-content {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-normal);
+}
+
+.libgrow-result-header {
+    font-weight: bold;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    border-bottom: 1px solid var(--divider-color);
+    padding-bottom: 8px;
+}

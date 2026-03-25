@@ -37,12 +37,12 @@ Key features include:
 - [x] **Predefined Prompts**: Implement a system for managing predefined prompts (e.g., "Explain this", "Summarize", "Find related concepts").
 
 ### Phase 3: Floating Toolbar UI
-- [ ] **Selection Listener**: Implement a robust listener for text selection in the `Editor`.
-- [ ] **Toolbar Component**:
-  - [ ] Create a floating DOM element that positions itself near the selection.
-  - [ ] Add buttons for LLM actions (Explain, Summarize, etc.).
-  - [ ] Implement hover effects and smooth transitions (Aesthetic focus).
-- [ ] **Result Display**: Decide on how to show the AI response (Notice, inline below selection, or a small side-pane/modal).
+- [x] **Selection Listener**: Implement a robust listener for text selection in the `Editor`.
+- [x] **Toolbar Component**:
+  - [x] Create a floating DOM element that positions itself near the selection.
+  - [x] Add buttons for LLM actions (Explain, Summarize, etc.).
+  - [x] Implement hover effects and smooth transitions (Aesthetic focus).
+- [x] **Result Display**: Decide on how to show the AI response (Notice, inline below selection, or a small side-pane/modal).
 
 ### Phase 4: Settings & Configuration
 - [ ] **Settings Interface**:
