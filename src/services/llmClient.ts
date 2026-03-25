@@ -13,6 +13,7 @@ interface OpenAIChatCompletionResponse {
  * 
  * @param baseUrl - The base URL of the LM Studio server (e.g., http://localhost:1234)
  * @param modelName - The model to use (e.g., local-model)
+ * @param systemPrompt - Baseline instructions for the AI
  * @param prompt - The instruction or predefined command
  * @param selectedContent - The specific text selected by the user
  * @param context - Optional surrounding text for context
@@ -20,6 +21,7 @@ interface OpenAIChatCompletionResponse {
 export async function callLMStudio(
 	baseUrl: string, 
 	modelName: string, 
+	systemPrompt: string,
 	prompt: string, 
 	selectedContent: string, 
 	context?: string
@@ -27,8 +29,6 @@ export async function callLMStudio(
 	// Ensure URL ends with /v1/chat/completions
 	const endpoint = `${baseUrl.replace(/\/$/, "")}/v1/chat/completions`;
 
-	const systemPrompt = "You are libgrow, a specialized assistant for Obsidian. Your goal is to help users understand, analyze, and refine their notes. Be precise, academic, and insightful.";
-	
 	const userMessage = context 
 		? `Surrounding Context:\n${context}\n\nSelected Text:\n${selectedContent}\n\nTask:\n${prompt}`
 		: `Selected Text:\n${selectedContent}\n\nTask:\n${prompt}`;

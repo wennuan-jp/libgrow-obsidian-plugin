@@ -141,6 +141,7 @@ export class FloatingToolbar {
 			const response = await callLMStudio(
 				this.settings.lmStudioUrl,
 				this.settings.modelName,
+				this.settings.systemPrompt,
 				prompt.prompt,
 				selectedText,
 				context

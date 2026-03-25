@@ -45,12 +45,12 @@ Key features include:
 - [x] **Result Display**: Decide on how to show the AI response (Notice, inline below selection, or a small side-pane/modal).
 
 ### Phase 4: Settings & Configuration
-- [ ] **Settings Interface**:
-  - [ ] LM Studio URL (default: `http://localhost:1234`).
-  - [ ] Model identifier.
-  - [ ] Custom system prompt.
-  - [ ] Toggle for auto-show toolbar.
-- [ ] **Settings Tab**: Polish the UI in `src/settings/` to be user-friendly.
+- [x] **Settings Interface**:
+  - [x] LM Studio URL (default: `http://localhost:1234`).
+  - [x] Model identifier.
+  - [x] Custom system prompt.
+  - [x] Toggle for auto-show toolbar.
+- [x] **Settings Tab**: Polish the UI in `src/settings/` to be user-friendly.
 
 ### Phase 5: Polish & Excellence
 - [ ] **Performance**: Ensure selection listeners are debounced or efficient to prevent lag.

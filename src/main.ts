@@ -40,6 +40,12 @@ export default class LibGrowPlugin extends Plugin {
 	}
 
 	private handleSelection() {
+		// Only check selection if the feature is enabled in settings
+		if (!this.settings.showToolbarOnSelection) {
+			this.toolbar.hide();
+			return;
+		}
+
 		const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
 		if (activeView) {
 			const editor = activeView.editor;
