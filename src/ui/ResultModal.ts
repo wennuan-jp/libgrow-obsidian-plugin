@@ -1,4 +1,4 @@
-import { App, Modal, Setting } from "obsidian";
+import { App, Modal, Notice, Setting } from "obsidian";
 
 /**
  * A modal to display libgrow LLM results in a clear, formatted way.
@@ -41,9 +41,10 @@ export class ResultModal extends Modal {
 
 		new Setting(contentEl)
 			.addButton(btn => btn
-				.setButtonText("Copy to Clipboard")
-				.onClick(() => {
-					navigator.clipboard.writeText(this.result);
+				.setButtonText("Copy to clipboard")
+				.onClick(async () => {
+					await navigator.clipboard.writeText(this.result);
+					new Notice("Copied to clipboard");
 				}))
 			.addButton(btn => btn
 				.setButtonText("Close")

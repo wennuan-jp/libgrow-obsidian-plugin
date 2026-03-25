@@ -35,9 +35,12 @@ export class FloatingToolbar {
 
 		this.isVisible = true;
 		this.updatePosition(editor);
-		this.toolbarEl!.style.display = "flex";
-		this.toolbarEl!.style.opacity = "1";
-		this.toolbarEl!.style.transform = "translateY(0)";
+		
+		if (this.toolbarEl) {
+			this.toolbarEl.removeClass("libgrow-hidden");
+			this.toolbarEl.removeClass("libgrow-fade-out");
+			this.toolbarEl.addClass("libgrow-fade-in");
+		}
 	}
 
 	/**
@@ -45,12 +48,12 @@ export class FloatingToolbar {
 	 */
 	hide() {
 		if (this.toolbarEl) {
-			this.toolbarEl.style.opacity = "0";
-			this.toolbarEl.style.transform = "translateY(5px)";
+			this.toolbarEl.removeClass("libgrow-fade-in");
+			this.toolbarEl.addClass("libgrow-fade-out");
 			// Use timeout to allow transition to finish
 			setTimeout(() => {
 				if (this.toolbarEl && !this.isVisible) {
-					this.toolbarEl.style.display = "none";
+					this.toolbarEl.addClass("libgrow-hidden");
 				}
 			}, 200);
 		}
@@ -64,7 +67,7 @@ export class FloatingToolbar {
 	private createToolbar() {
 		this.toolbarEl = document.createElement("div");
 		this.toolbarEl.addClass("libgrow-toolbar");
-		this.toolbarEl.style.display = "none";
+		this.toolbarEl.addClass("libgrow-hidden");
 		document.body.appendChild(this.toolbarEl);
 
 		PREDEFINED_PROMPTS.forEach(prompt => {
@@ -81,15 +84,15 @@ export class FloatingToolbar {
 			
 			button.addEventListener("click", (e) => {
 				e.preventDefault();
-				this.handlePromptClick(prompt);
+				void this.handlePromptClick(prompt);
 			});
 		});
 
 		// Loading indicator (hidden by default)
 		this.loadingEl = this.toolbarEl.createEl("div", {
-			cls: "libgrow-loading",
-			attr: { "style": "display: none;" }
+			cls: "libgrow-loading"
 		});
+		this.loadingEl.addClass("libgrow-hidden");
 		this.loadingEl.createEl("div", { cls: "libgrow-spinner" });
 		this.loadingEl.createSpan({ text: "Processing..." });
 	}
@@ -100,9 +103,8 @@ export class FloatingToolbar {
 	private updatePosition(editor: Editor) {
 		if (!this.toolbarEl) return;
 
-		// getSelectionCoords gets pixel coordinates of the selection
-		// Obsidian API: getSelectionCoords(from?: Pos, to?: Pos): {top: number, left: number, right: number, bottom: number}
 		try {
+			// getSelectionCoords gets pixel coordinates of the selection
 			const coords = (editor as any).getSelectionCoords();
 			if (!coords) return;
 
@@ -117,8 +119,10 @@ export class FloatingToolbar {
 			left = Math.max(10, Math.min(window.innerWidth - toolbarWidth - 10, left));
 			top = Math.max(10, Math.min(window.innerHeight - toolbarHeight - 10, top));
 
-			this.toolbarEl.style.left = `${left}px`;
-			this.toolbarEl.style.top = `${top}px`;
+			this.toolbarEl.setCssProps({
+				"left": `${left}px`,
+				"top": `${top}px`
+			});
 		} catch (e) {
 			console.error("libgrow position error:", e);
 		}
@@ -163,9 +167,9 @@ export class FloatingToolbar {
 		if (this.toolbarEl) {
 			// Hide buttons, show loading
 			this.toolbarEl.querySelectorAll(".libgrow-toolbar-button").forEach((btn: HTMLElement) => {
-				btn.style.display = "none";
+				btn.addClass("libgrow-hidden");
 			});
-			if (this.loadingEl) this.loadingEl.style.display = "flex";
+			if (this.loadingEl) this.loadingEl.removeClass("libgrow-hidden");
 		}
 	}
 
@@ -174,9 +178,9 @@ export class FloatingToolbar {
 		if (this.toolbarEl) {
 			// Show buttons, hide loading
 			this.toolbarEl.querySelectorAll(".libgrow-toolbar-button").forEach((btn: HTMLElement) => {
-				btn.style.display = "flex";
+				btn.removeClass("libgrow-hidden");
 			});
-			if (this.loadingEl) this.loadingEl.style.display = "none";
+			if (this.loadingEl) this.loadingEl.addClass("libgrow-hidden");
 		}
 	}
 

@@ -53,10 +53,10 @@ Key features include:
 - [x] **Settings Tab**: Polish the UI in `src/settings/` to be user-friendly.
 
 ### Phase 5: Polish & Excellence
-- [ ] **Performance**: Ensure selection listeners are debounced or efficient to prevent lag.
-- [ ] **Aesthetics**: Apply premium CSS styling to the toolbar (glassmorphism, subtle shadows).
-- [ ] **Documentation**: Update `README.md` with final installation and usage instructions.
-- [ ] **Final Testing**: Verify functionality on both Desktop and (if applicable) Mobile.
+- [x] **Performance**: Ensure selection listeners are debounced or efficient to prevent lag.
+- [x] **Aesthetics**: Apply premium CSS styling to the toolbar (glassmorphism, subtle shadows).
+- [x] **Documentation**: Update `README.md` with final installation and usage instructions.
+- [x] **Final Testing**: Verify functionality on both Desktop and (if applicable) Mobile.
 
 ---
 
