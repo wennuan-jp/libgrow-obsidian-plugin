@@ -23,9 +23,18 @@ export async function callLMStudioStreaming(
 	}
 	const endpoint = `${cleanBaseUrl}/chat/completions`.replace(/\/v1\/v1/, "/v1");
 
-	const userMessage = context 
-		? `Surrounding Context:\n${context}\n\nSelected Text:\n${selectedContent}\n\nTask:\n${prompt}`
-		: `Selected Text:\n${selectedContent}\n\nTask:\n${prompt}`;
+	// Template replacement logic
+	let userMessage = prompt;
+	if (userMessage.includes("{selected}") || userMessage.includes("{context}")) {
+		userMessage = userMessage
+			.replace(/{selected}/g, selectedContent || "")
+			.replace(/{context}/g, context || "");
+	} else {
+		// Legacy fallback if template tags aren't present
+		userMessage = context 
+			? `Surrounding Context:\n${context}\n\nSelected Text:\n${selectedContent}\n\nTask:\n${prompt}`
+			: `Selected Text:\n${selectedContent}\n\nTask:\n${prompt}`;
+	}
 
 	console.log(`libgrow: calling ${endpoint} via Node.js http (bypassing CORS)`);
 	

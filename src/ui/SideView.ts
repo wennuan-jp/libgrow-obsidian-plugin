@@ -34,6 +34,16 @@ export class LibGrowSideView extends ItemView {
 
 		const controls = header.createEl("div", { cls: "libgrow-side-view-controls" });
 		
+		const settingsBtn = controls.createEl("button", {
+			cls: ["libgrow-side-view-button", "clickable-icon"],
+			attr: { "aria-label": "Open settings" }
+		});
+		setIcon(settingsBtn, "lucide-settings");
+		settingsBtn.addEventListener("click", () => {
+			(this.app as any).setting.open();
+			(this.app as any).setting.openTabById("libgrow-obsidian-plugin");
+		});
+
 		this.copyBtn = controls.createEl("button", {
 			cls: ["libgrow-side-view-button", "clickable-icon"],
 			attr: { "aria-label": "Copy response" }

@@ -1,8 +1,7 @@
 import { App, Editor, setIcon, WorkspaceLeaf } from "obsidian";
-import { PREDEFINED_PROMPTS, LibGrowPrompt } from "../services/promptService";
 import { callLMStudioStreaming } from "../services/llmClient";
-import { LibGrowSettings } from "../settings";
-import { getSurroundingContext } from "../utils/editorUtils";
+import { LibGrowSettings, CustomPrompt } from "../settings";
+import { getSemanticContext } from "../utils/editorUtils";
 import LibGrowPlugin from "../main";
 import { LibGrowSideView, VIEW_TYPE_LIBGROW } from "./SideView";
 
@@ -111,19 +110,21 @@ export class FloatingToolbar {
 	 * Hides the toolbar from view.
 	 */
 	hide() {
-		if (this.toolbarEl && this.isVisible) {
-			console.log("FloatingToolbar: hiding");
+		this.isVisible = false;
+		this.stopLoading();
+		
+		if (this.toolbarEl) {
+			console.log("FloatingToolbar: hiding element");
 			this.toolbarEl.removeClass("libgrow-fade-in");
 			this.toolbarEl.addClass("libgrow-fade-out");
-			// Use timeout to allow transition to finish
+			
+			// Use timeout only for the 'display: none' part to allow fade transition
 			setTimeout(() => {
 				if (this.toolbarEl && !this.isVisible) {
 					this.toolbarEl.addClass("libgrow-hidden");
 				}
-			}, 200);
+			}, 250);
 		}
-		this.isVisible = false;
-		this.stopLoading();
 	}
 
 	/**
@@ -136,31 +137,57 @@ export class FloatingToolbar {
 		document.body.appendChild(this.toolbarEl);
 		console.log("FloatingToolbar: element appended to body");
 
-		PREDEFINED_PROMPTS.forEach(prompt => {
-			const button = this.toolbarEl!.createEl("button", {
+		this.refreshButtons();
+
+		// Loading indicator (hidden by default)
+		if (this.toolbarEl) {
+			this.loadingEl = this.toolbarEl.createEl("div", {
+				cls: "libgrow-loading"
+			});
+			this.loadingEl.addClass("libgrow-hidden");
+			this.loadingEl.createEl("div", { cls: "libgrow-spinner" });
+			this.loadingEl.createSpan({ text: "Processing..." });
+		}
+	}
+
+	/**
+	 * Re-renders the action buttons based on current settings.
+	 */
+	public refreshButtons() {
+		if (!this.toolbarEl) return;
+		
+		// Clear existing buttons except loading indicator
+		this.toolbarEl.querySelectorAll(".libgrow-toolbar-button").forEach(btn => btn.remove());
+
+		// Render dynamic buttons from settings
+		this.settings.customPrompts.forEach(prompt => {
+			if (!this.toolbarEl) return;
+			const button = this.toolbarEl.createEl("button", {
 				cls: ["libgrow-toolbar-button", "clickable-icon"],
 				attr: { "aria-label": prompt.name }
 			});
 			
-			if (prompt.icon) {
-				setIcon(button, prompt.icon);
-			}
+			// Default icon for custom prompts
+			setIcon(button, "message-square");
 			
 			button.createSpan({ text: prompt.name });
 			
 			button.addEventListener("click", (e) => {
 				e.preventDefault();
+				this.hide(); // Dismiss toolbar immediately
 				void this.handlePromptClick(prompt);
 			});
 		});
+	}
 
-		// Loading indicator (hidden by default)
-		this.loadingEl = this.toolbarEl.createEl("div", {
-			cls: "libgrow-loading"
-		});
-		this.loadingEl.addClass("libgrow-hidden");
-		this.loadingEl.createEl("div", { cls: "libgrow-spinner" });
-		this.loadingEl.createSpan({ text: "Processing..." });
+
+	/**
+	 * Repositions the toolbar if it is currently visible.
+	 */
+	public reposition(editor: Editor) {
+		if (this.isVisible) {
+			this.updatePosition(editor);
+		}
 	}
 
 	/**
@@ -215,9 +242,9 @@ export class FloatingToolbar {
 	}
 
 	/**
-	 * Handles a click on a predefined prompt button.
+	 * Handles a click on a prompt button.
 	 */
-	private async handlePromptClick(prompt: LibGrowPrompt) {
+	private async handlePromptClick(prompt: CustomPrompt) {
 		const editor = this.currentEditor;
 		if (!editor) return;
 		
@@ -226,8 +253,8 @@ export class FloatingToolbar {
 
 		this.startLoading(prompt.id);
 		
-		// Extract surrounding context
-		const context = getSurroundingContext(editor);
+		// Extract expanded semantic context
+		const context = getSemanticContext(editor);
 		
 		try {
 			// Activate the side view first
@@ -241,13 +268,12 @@ export class FloatingToolbar {
 			const abortController = new AbortController();
 			
 			sideView.startLoading(abortController);
-			this.hide(); // Hide toolbar to focus on side panel
 
 			await callLMStudioStreaming(
 				this.settings.lmStudioUrl,
 				this.settings.modelName,
 				this.settings.systemPrompt,
-				prompt.prompt,
+				prompt.template,
 				selectedText,
 				context,
 				(chunk) => {
@@ -302,4 +328,17 @@ export class FloatingToolbar {
 			this.toolbarEl = null;
 		}
 	}
+
+	/**
+	 * Checks if a mouse event occurred within the toolbar's bounds.
+	 * This is useful for "click outside" detection.
+	 */
+	public isEventInToolbar(evt: MouseEvent | TouchEvent): boolean {
+		if (!this.toolbarEl || !this.isVisible) return false;
+		
+		const target = evt.target as HTMLElement;
+		return this.toolbarEl.contains(target);
+	}
 }
+
+

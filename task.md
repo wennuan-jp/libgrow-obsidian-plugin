@@ -74,28 +74,49 @@ Key features include:
   - [x] Add a **Copy** button to copy the AI's response to the clipboard.
 
 ## Feature #2: Customizable Prompts & Semantic Context
-- [ ] **Step 2.1: Settings Infrastructure**
-  - [ ] Update `LibGrowSettings` to include a `customPrompts` array.
-  - [ ] Build a list-based UI in the Settings Tab for adding/deleting prompts.
-- [ ] **Step 2.2: Semantic Context Engine**
-  - [ ] Implement `getSemanticContext(editor)` in `editorUtils.ts`.
-  - [ ] Use paragraph-expansion logic to ensure context begins/ends on whole sentences.
-- [ ] **Step 2.3: Template Replacement & Dynamic Toolbar**
-  - [ ] Replace `{selected}` and `{context}` tags in templates.
-  - [ ] Update `FloatingToolbar.ts` to render custom user buttons dynamically.
+- [x] **Step 2.1: Settings Infrastructure**
+  - [x] Update `LibGrowSettings` to include a `customPrompts` array.
+  - [x] Build a list-based UI in the Settings Tab for adding/deleting prompts.
+- [x] **Step 2.2: Semantic Context Engine**
+  - [x] Implement `getSemanticContext(editor)` in `editorUtils.ts`.
+  - [x] Use paragraph-expansion logic to ensure context begins/ends on whole sentences.
+- [x] **Step 2.3: Template Replacement & Dynamic Toolbar**
+  - [x] Replace `{selected}` and `{context}` tags in templates.
+  - [x] Update `FloatingToolbar.ts` to render custom user buttons dynamically.
 
 ## Feature #3: Settings Access in Side Panel
-- [ ] **Step 3.1: Settings Entry Point**
-  - [ ] Add a settings icon button (e.g., `lucide-settings`) to the side panel header.
-  - [ ] Map the button to trigger `this.app.setting.openTabById("libgrow-obsidian-plugin")`.
+- [x] **Step 3.1: Settings Entry Point**
+  - [x] Add a settings icon button (e.g., `lucide-settings`) to the side panel header.
+  - [x] Map the button to trigger `this.app.setting.openTabById("libgrow-obsidian-plugin")`.
 
 ## Feature #4: Sticky Toolbar Positioning
-- [ ] **Step 4.1: Relative Positioning**
-  - [ ] Modify `FloatingToolbar.ts` to use relative positioning or absolute positioning tied to the editor scroll event.
-- [ ] **Step 4.2: Scroll Sync**
-  - [ ] Register a scroll listener on the editor container to reposition the toolbar as the user scrolls.
+- [x] **Step 4.1: Relative Positioning**
+  - [x] Modify `FloatingToolbar.ts` to use relative positioning or absolute positioning tied to the editor scroll event.
+- [x] **Step 4.2: Scroll Sync**
+  - [x] Register a scroll listener on the editor container to reposition the toolbar as the user scrolls.
+
+## Feature #5: more interactive selection indication in side panel
+When user select a word or phrase in the editor, display the selection and context in the side panel(two text widget at the top)
 
 ---
+
+# Adjustment
+## [x] display the side panel icon as default
+currently this icon is showed only when User click on items in floating bar. What I want is this icon is always visible in the right side bar. And the side panel is always opened default.
+
+---
+
+# Bugs
+## 浮动工具栏在用户交互后未能正确隐藏，且点击行为未触发关闭逻辑
+当浮动工具栏弹出后，无论用户执行何种操作（包括点击工具栏内的项目、切换标签页、打开设置页面，或点击 Obsidian 应用界面的任意其他区域），工具栏均保持显示状态，未能按预期自动隐藏。
+
+预期行为：
+
+用户点击浮动工具栏内的任意项目后，工具栏应立即关闭。
+用户点击 Obsidian 应用界面内的任意位置（包括切换标签、打开新页面或点击空白处）后，工具栏应立即关闭。
+当前问题：
+目前的修复方案仅解决了部分场景（如点击工具栏项目），但未覆盖全局交互。在切换标签页、打开设置或点击应用其他区域时，浮动工具栏依然错误地停留在界面上，导致无法进行后续操作或遮挡视线。
+
 
 ---
 
@@ -103,5 +124,3 @@ Key features include:
 - **Last Updated**: 2026-03-25
 - **Status**: Planning Phase
 - **Target Version**: 1.0.0
-
-
