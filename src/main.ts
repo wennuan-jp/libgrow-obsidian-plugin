@@ -1,6 +1,7 @@
-import { Editor, MarkdownView, Plugin } from 'obsidian';
+import { Editor, MarkdownView, Plugin, WorkspaceLeaf } from 'obsidian';
 import { DEFAULT_SETTINGS, LibGrowSettings, LibGrowSettingTab } from "./settings";
 import { FloatingToolbar } from "./ui/FloatingToolbar";
+import { LibGrowSideView, VIEW_TYPE_LIBGROW } from "./ui/SideView";
 
 export default class LibGrowPlugin extends Plugin {
 	settings: LibGrowSettings;
@@ -12,8 +13,21 @@ export default class LibGrowPlugin extends Plugin {
 		// Add settings tab
 		this.addSettingTab(new LibGrowSettingTab(this.app, this));
 
+		// Register the side view
+		this.registerView(
+			VIEW_TYPE_LIBGROW,
+			(leaf) => new LibGrowSideView(leaf)
+		);
+
+		// Add command to toggle the side view
+		this.addCommand({
+			id: "toggle-side-view",
+			name: "Toggle AI side panel",
+			callback: () => this.activateView(),
+		});
+
 		// Initialize Floating Toolbar
-		this.toolbar = new FloatingToolbar(this.app, this.settings);
+		this.toolbar = new FloatingToolbar(this.app, this.settings, this);
 
 		// Selection event listeners: mouseup for primary, keyup for keyboard selection
 		// Listening on window/document for global captures
@@ -88,6 +102,27 @@ export default class LibGrowPlugin extends Plugin {
 			}, 50);
 		} else {
 			this.toolbar.hide();
+		}
+	}
+
+	async activateView() {
+		const { workspace } = this.app;
+
+		let leaf: WorkspaceLeaf | null = null;
+		const leaves = workspace.getLeavesOfType(VIEW_TYPE_LIBGROW);
+
+		if (leaves.length > 0) {
+			leaf = leaves[0] as WorkspaceLeaf;
+		} else {
+			const rightLeaf = workspace.getRightLeaf(false);
+			if (rightLeaf) {
+				leaf = rightLeaf;
+				await leaf.setViewState({ type: VIEW_TYPE_LIBGROW, active: true });
+			}
+		}
+
+		if (leaf) {
+			workspace.revealLeaf(leaf);
 		}
 	}
 

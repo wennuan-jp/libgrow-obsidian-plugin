@@ -1,9 +1,10 @@
-import { App, Editor, setIcon } from "obsidian";
+import { App, Editor, setIcon, WorkspaceLeaf } from "obsidian";
 import { PREDEFINED_PROMPTS, LibGrowPrompt } from "../services/promptService";
-import { callLMStudio } from "../services/llmClient";
+import { callLMStudioStreaming } from "../services/llmClient";
 import { LibGrowSettings } from "../settings";
 import { getSurroundingContext } from "../utils/editorUtils";
-import { ResultModal } from "./ResultModal";
+import LibGrowPlugin from "../main";
+import { LibGrowSideView, VIEW_TYPE_LIBGROW } from "./SideView";
 
 /**
  * Manages the floating toolbar that appears near text selections.
@@ -15,7 +16,11 @@ export class FloatingToolbar {
 	private isVisible: boolean = false;
 	private currentLoadingPromptId: string | null = null;
 
-	constructor(private app: App, private settings: LibGrowSettings) {}
+	constructor(
+		private app: App, 
+		private settings: LibGrowSettings,
+		private plugin: LibGrowPlugin
+	) {}
 
 	/**
 	 * Shows the toolbar near the current editor selection.
@@ -213,33 +218,56 @@ export class FloatingToolbar {
 	 * Handles a click on a predefined prompt button.
 	 */
 	private async handlePromptClick(prompt: LibGrowPrompt) {
-		if (!this.currentEditor) return;
-		const selectedText = this.currentEditor.getSelection();
+		const editor = this.currentEditor;
+		if (!editor) return;
+		
+		const selectedText = editor.getSelection();
 		if (!selectedText) return;
 
 		this.startLoading(prompt.id);
 		
-		// Extract surrounding context (Phase 2 feature)
-		const context = getSurroundingContext(this.currentEditor);
+		// Extract surrounding context
+		const context = getSurroundingContext(editor);
 		
 		try {
-			const response = await callLMStudio(
+			// Activate the side view first
+			await this.plugin.activateView();
+			
+			// Get the side view instance
+			const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_LIBGROW);
+			if (leaves.length === 0) throw new Error("Could not find or create libgrow side view");
+			
+			const sideView = (leaves[0] as WorkspaceLeaf).view as LibGrowSideView;
+			const abortController = new AbortController();
+			
+			sideView.startLoading(abortController);
+			this.hide(); // Hide toolbar to focus on side panel
+
+			await callLMStudioStreaming(
 				this.settings.lmStudioUrl,
 				this.settings.modelName,
 				this.settings.systemPrompt,
 				prompt.prompt,
 				selectedText,
-				context
+				context,
+				(chunk) => {
+					sideView.appendChunk(chunk);
+				},
+				abortController.signal
 			);
 			
-			this.stopLoading();
-			this.hide(); // Hide toolbar after successful click to focus on results
-			
-			// Show the results in our custom modal
-			new ResultModal(this.app, prompt.name, response).open();
+			sideView.stopLoading();
 		} catch (error) {
 			this.stopLoading();
 			console.error("libgrow handler error:", error);
+			
+			// Show error in side view if possible
+			const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_LIBGROW);
+			if (leaves.length > 0) {
+				const sideView = (leaves[0] as WorkspaceLeaf).view as LibGrowSideView;
+				sideView.stopLoading();
+				sideView.appendChunk(`\n\nError: ${error instanceof Error ? error.message : String(error)}`);
+			}
 		}
 	}
 

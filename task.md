@@ -60,7 +60,48 @@ Key features include:
 
 ---
 
+# New Features
+
+## Feature #1: Streaming Side Panel
+- [x] **Step 1.1: Side View Registration**
+  - [x] Implement a custom `View` class for the sidebar.
+  - [x] Register the view in `main.ts` and add a command/icon to toggle it.
+- [x] **Step 1.2: Streaming LLM Integration**
+  - [x] Update `llmClient.ts` to support fetching with streams.
+  - [x] Implement handling for incoming chunks and reactive UI updates.
+- [x] **Step 1.3: UI Controls**
+  - [x] Add a **Stop** button to abort current fetch requests.
+  - [x] Add a **Copy** button to copy the AI's response to the clipboard.
+
+## Feature #2: Customizable Prompts & Semantic Context
+- [ ] **Step 2.1: Settings Infrastructure**
+  - [ ] Update `LibGrowSettings` to include a `customPrompts` array.
+  - [ ] Build a list-based UI in the Settings Tab for adding/deleting prompts.
+- [ ] **Step 2.2: Semantic Context Engine**
+  - [ ] Implement `getSemanticContext(editor)` in `editorUtils.ts`.
+  - [ ] Use paragraph-expansion logic to ensure context begins/ends on whole sentences.
+- [ ] **Step 2.3: Template Replacement & Dynamic Toolbar**
+  - [ ] Replace `{selected}` and `{context}` tags in templates.
+  - [ ] Update `FloatingToolbar.ts` to render custom user buttons dynamically.
+
+## Feature #3: Settings Access in Side Panel
+- [ ] **Step 3.1: Settings Entry Point**
+  - [ ] Add a settings icon button (e.g., `lucide-settings`) to the side panel header.
+  - [ ] Map the button to trigger `this.app.setting.openTabById("libgrow-obsidian-plugin")`.
+
+## Feature #4: Sticky Toolbar Positioning
+- [ ] **Step 4.1: Relative Positioning**
+  - [ ] Modify `FloatingToolbar.ts` to use relative positioning or absolute positioning tied to the editor scroll event.
+- [ ] **Step 4.2: Scroll Sync**
+  - [ ] Register a scroll listener on the editor container to reposition the toolbar as the user scrolls.
+
+---
+
+---
+
 ## Progress Tracking
 - **Last Updated**: 2026-03-25
 - **Status**: Planning Phase
 - **Target Version**: 1.0.0
+
+
